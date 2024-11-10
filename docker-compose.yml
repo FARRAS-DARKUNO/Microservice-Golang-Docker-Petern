@@ -1,0 +1,107 @@
+# version: "3.8"
+services:
+  book-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: BookService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: FARRAS27
+    ports:
+      - "5432:5432"
+    networks:
+      - library-network
+
+  author-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: AuthorService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: FARRAS27
+    ports:
+      - "5433:5432"
+    networks:
+      - library-network
+
+  category-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: CategoryService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: FARRAS27
+    ports:
+      - "5434:5432"
+    networks:
+      - library-network
+
+  user-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: UserService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: FARRAS27
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PG_LISTEN_ADDRESSES: "*"
+    ports:
+      - "5435:5432"
+    networks:
+      - library-network
+
+  book-service:
+    build: ./book-service
+    depends_on:
+      - book-db
+    environment:
+      - DATABASE_URL=postgres://postgres:FARRAS27@book-db:5432/BookService?sslmode=disable
+    networks:
+      library-network:
+        aliases:
+          - book-service
+    ports:
+      - "3001:80"
+    command: ["/wait-for-postgres.sh", "book-db", "5432", "--", "go", "run", "main.go"]
+
+  author-service:
+    build: ./author-service
+    depends_on:
+      - author-db
+    environment:
+      - DATABASE_URL=postgres://postgres:FARRAS27@author-db:5433/AuthorService?sslmode=disable
+    networks:
+      library-network:
+        aliases:
+          - author-service
+    ports:
+      - "3002:80"
+    command: ["/wait-for-postgres.sh", "author-db", "5433", "--", "go", "run", "main.go"]
+
+  category-service:
+    build: ./category-service
+    depends_on:
+      - category-db
+    environment:
+      - DATABASE_URL=postgres://postgres:FARRAS27@category-db:5434/CategoryService?sslmode=disable
+    networks:
+      library-network:
+        aliases:
+          - category-service
+    ports:
+      - "3003:80"
+    command: ["/app/wait-for-postgres.sh", "category-db", "5434", "--", "go", "run", "main.go"]
+
+  user-service:
+    build: ./user-service
+    depends_on:
+      - user-db
+    environment:
+      - DATABASE_URL=postgres://postgres:FARRAS27@user-db:5435/UserService?sslmode=disable
+    networks:
+      library-network:
+        aliases:
+          - user-service
+    ports:
+      - "3004:80"
+    command: ["/wait-for-postgres.sh", "user-db", "5435", "--", "go", "run", "main.go"]
+
+networks:
+  library-network:
+    driver: bridge
