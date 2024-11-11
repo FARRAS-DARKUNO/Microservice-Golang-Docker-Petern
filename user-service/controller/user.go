@@ -13,7 +13,10 @@ import (
 
 // Login function to authenticate user
 func Login(c *fiber.Ctx) error {
-	var input models.User
+	var input struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 	var user models.User
 
 	// Parse the request body
@@ -75,6 +78,20 @@ func Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Registration successful",
 	})
+}
+
+// GetUserByID function to retrieve user by ID
+func GetUserByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var user models.User
+
+	// Retrieve the user from database
+	if err := config.DB.First(&user, id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).SendString("User not found")
+	}
+
+	// Return user data as JSON
+	return c.Status(fiber.StatusOK).JSON(user)
 }
 
 // Function to generate JWT token

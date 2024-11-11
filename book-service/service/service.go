@@ -28,7 +28,7 @@ type User struct {
 
 // Perbaiki tipe return di sini menjadi *User, bukan *Author
 func GetUserByID(userID uint) (*User, error) {
-	url := fmt.Sprintf("http://user-service-url/api/users/%d", userID) 
+	url := fmt.Sprintf("http://localhost:3004/authors/%d", userID) 
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func GetUserByID(userID uint) (*User, error) {
 }
 
 func GetAuthorByID(authorID uint) (*Author, error) {
-	url := fmt.Sprintf("http://localhost:3002/authors%d", authorID)
+	url := fmt.Sprintf("http://localhost:3002/authors/%d", authorID)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
